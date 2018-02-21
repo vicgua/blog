@@ -16,9 +16,20 @@
 title: Victor G's blog
 #description: >- # this means to ignore newlines until "baseurl:"
 #  Here be a description
-baseurl: "/blog" # the subpath of your site, e.g. /blog
-url: "https://vicgua.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  vicgua
+
+# defaults:
+#   - scope:
+#       path: ""
+#       type: "posts"
+#     values:
+#       comments: true
+
+permalink: pretty
+show_excerpts: true
+timezone: Europe/Madrid
 
 # Build settings
 markdown: kramdown
