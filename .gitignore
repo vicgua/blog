@@ -1,7 +1,7 @@
 # Directory for temporal files (like writing programs to be embedded in a post)
 /tests/
 /vendor/bundle
-/.bundle
+/.bundle/
 
 # Created by https://www.gitignore.io/api/jekyll,visualstudiocode
 

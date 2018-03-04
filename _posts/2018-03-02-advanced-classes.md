@@ -313,168 +313,14 @@ parameters (called _default constructor_), 1 and 2).
 # Complete code
 To finish, I'll leave a copy of the complete `Complex` class:
 
-```c++
-// complex.hh
-#ifndef _COMPLEX_HH
-#define _COMPLEX_HH
+{% gist e91c2f7e650cb985dee9a2efb579966a complex.hh %}
 
-#include <iostream>
-
-using namespace std;
-
-class Complex {
-private:
-    /// Compare two doubles (to avoid rounding errors)
-    static bool doubleeq(double a, double b);
-    /// Maximum allowed error when comparing
-    static const double MAX_ERROR = 1e-9; // 1 * 10^-9
-public:
-    double re, im;
-    
-    Complex(double re = 0, double im = 0);
-
-    // Alternative constructor
-    static Complex from_polar(double module, double phase);
-    
-    // Getters
-    double module() const;
-    double phase() const;
-    // Setters
-    void module(double new_module);
-    void phase(double new_phase);
-
-    // Operations
-    //  Binary operations
-    Complex operator +(const Complex& other) const; // a + b
-    Complex operator -(const Complex& other) const; // a - b
-    Complex operator *(const Complex& other) const; // a * b
-    Complex operator /(const Complex& other) const; // a / b
-    //  Unary operations
-    Complex operator +() const; // +a (equivalent to a)
-    Complex operator -() const; // -a
-    bool operator !() const; // not a (equivalent to a == 0)
-    //  Comparison operations
-    bool operator ==(const Complex& other) const;
-    bool operator !=(const Complex& other) const;
-    // Complex numbers are not ordered, so <, >, <=, >= are meaningless.
-
-    // I/O
-    friend istream& operator >>(istream& is, Complex& c);
-    friend ostream& operator <<(ostream& os, const Complex& c);
-};
-
-#endif
-```
-```c++
-// complex.cc
-#include "complex.hh"
-
-#include <cmath>
-
-using namespace std;
-
-bool Complex::doubleeq(double a, double b) {
-    return abs(a - b) < MAX_ERROR;
-}
-
-Complex::Complex(double re, double im) : re(re), im(im) {}
-
-/* This constructor is the same (but shorter) as.
-Complex::Complex(double re, double im) {
-    this->re = re;
-    this->im = im;
-}
-*/
-
-Complex Complex::from_polar(double module, double phase) {
-    double re = module * cos(phase);
-    double im = module * sin(phase);
-    return Complex(re, im);
-}
-
-double Complex::module() const {
-    return sqrt(re*re + im*im); // Skipping `this` for readability
-}
-
-void Complex::module(double new_module) {
-    double quot = new_module / this->module();
-    this->re *= quot;
-    this->im *= quot;
-}
-
-double Complex::phase() const {
-    return atan(im / re);
-}
-
-void Complex::phase(double new_phase) {
-    double module = this->module();
-    this->re = module * cos(new_phase);
-    this->im = module * sin(new_phase);
-}
-
-Complex Complex::operator +(const Complex& other) const {
-    return Complex(this->re + other.re, this->im + other.im);
-}
-
-Complex Complex::operator -(const Complex& other) const {
-    return Complex(this->re - other.re, this->im - other.im);
-}
-
-Complex Complex::operator *(const Complex& other) const {
-    double module = this->module() * other.module();
-    double phase = this->phase() + other.phase();
-    return Complex::from_polar(module, phase);
-}
-
-Complex Complex::operator /(const Complex& other) const {
-    double module = this->module() / other.module();
-    double phase = this->phase() - other.phase();
-    return Complex::from_polar(module, phase);
-}
-
-Complex Complex::operator +() const {
-    return Complex(this->re, this->im);
-}
-
-Complex Complex::operator -() const {
-    return Complex(-this->re, -this->im);
-}
-
-bool Complex::operator !() const {
-    return (
-        this->re < MAX_ERROR and this->im < MAX_ERROR);
-}
-
-bool Complex::operator ==(const Complex& other) const {
-    return (
-        this->doubleeq(this->re, other.re) and
-        this->doubleeq(this->im, other.im)
-    );
-}
-
-bool Complex::operator !=(const Complex& other) const {
-    return not (this->operator==(other));
-}
-
-istream& operator >>(istream& is, Complex& c) {
-    is >> c.re >> c.im;
-    return is;
-}
-
-ostream& operator <<(ostream& os, const Complex& c) {
-    os << c.re;
-    if (c.im >= 0)
-        os << " + j" << +c.im; // + is only for symmetry
-    else
-        os << " - j" << -c.im;
-    return os;
-}
-```
+{% gist e91c2f7e650cb985dee9a2efb579966a complex.cc %}
 
 Notes:
 1. I have used a short version for the constructor.
 2. I have added a few more operators, like comparison and unary operators,
-    like `-a` (e.g.:, for 1+2j is -1-2j) and `+a` (which returns the number
+    like `-a` (e.g.:, for 1+j2 is -1-j2) and `+a` (which returns the number
     unchanged; only for symmetry with `-a`).
 3. Because computers have finite precision, given the following code
     ```c++
@@ -483,7 +329,7 @@ Notes:
     bool eq = (a.re == b.re) and (a.im == b.im);
     ```
     `eq` may not be true because, since `sqrt(4*4 + 5*5)` is not exact,
-    they may differ on the LSB due to rounding and other floating point issues,
+    they may differ due to rounding and other floating point issues,
     so instead I compare if the difference between both is less than a certain
     threshold.
 
