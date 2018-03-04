@@ -212,6 +212,9 @@ As you may have guessed, if your object is constant, you can call its constant
 methods (because they are guaranteed not to change the object), but not
 non-constant ones, that may alter the object.
 
+Obvious side-note: the constructor can't be const because... well, why would you
+want a constructor that isn't allowed to construct anything?
+
 # Writing the methods
 So far, we have only been using the prototype of the function: we say what
 methods and attributes it has, and act as if they magically worked. Now, I'm
@@ -305,7 +308,7 @@ OK, the first thing we see is that we have to use the same syntax as static
 methods everywhere. It kind of makes sense: if we are referring to an object,
 we use `.`, but if we are referring to the class itself, we use `::`.
 
-## What is `this`? `->`!?
+## What is `this`? `->`!? (Extra)
 Note the conspicuous absence of `this` in the static method `read`. If we recap,
 a static method is one that does not act on an instance of the class, so
 non-static methods are those that (should) act on an instance. How? With `this`:
@@ -325,7 +328,8 @@ There are two **important side notes** here:
     `this->re` and `this->im` because `re` and `im` alone are the parameters of
     the constructor. To avoid having to track when I have and don't have to use
     `this`, I always use it. I don't know what is the official position of the
-    teachers of PRO2 about this.
+    teachers of PRO2 about this. [**UPDATE**: In PRO2 professors usually don't
+    use `this`, but I don't think it's forbidden or anything like that.]
 2. A static method can not use `this`, but a non-static method does not have
     to use it, like it does not have to use all of its parameters. However let's
     remember the following lemma: if you don't use a parameter, you probably
@@ -366,7 +370,7 @@ class Student {
 private:
     int id;
     double grade;
-    bool _has_grade;
+    bool has_grade_;
 
     static const double MAX_GRADE = 10;
 public:
@@ -390,17 +394,17 @@ public:
 
 Student::Student(int id) {
     this->id = id;
-    this->_has_grade = false;
+    this->has_grade_ = false;
     this->grade = 0; // Dummy value
 }
 
 Student::Student(int id, double grade) {
     this->id = id;
     if (grade > Student::MAX_GRADE) {
-        this->_has_grade = false;
+        this->has_grade_ = false;
         this->grade = 0;
     } else {
-        this->_has_grade = true;
+        this->has_grade_ = true;
         this->grade = grade;
     }
 }
@@ -410,11 +414,11 @@ int Student::get_id() const {
 }
 
 bool Student::has_grade() const {
-    return this->_has_grade;
+    return this->has_grade_;
 }
 
 double Student::get_grade() const {
-    if (not this->_has_grade)
+    if (not this->has_grade_)
         return -1; // ERROR
     return this->grade;
 }
@@ -426,12 +430,12 @@ void Student::set_id(int id) {
 void Student::set_grade(double grade) {
     if (grade > Student::MAX_GRADE)
         return;
-    this->_has_grade = true;
+    this->has_grade_ = true;
     this->grade = grade;
 }
 
 void Student::clear_grade() {
-    this->_has_grade = false;
+    this->has_grade_ = false;
 }
 
 double Student::get_max_grade() {
@@ -477,19 +481,111 @@ test.cc:78:12: error: within this context
 There can also be private methods, which can only be called inside the class.
 
 ## Getters and setters
-This shows a recurring pattern in programming: getters and setters. The theory is this:
-You have a private variable which stores the actual data, and two public methods, which
-can edit its value indirectly. They are usually called `get_var` and `set_var`, although
-`has_var`, `is_var` and `clear_var` are also common for booleans.
+This shows a recurring pattern in programming: getters and setters. The theory
+is this: You have a private variable which stores the actual data, and two
+public methods, which can edit its value indirectly. They are usually called
+`get_var` and `set_var`, although `has_var`, `is_var` and `clear_var` are also
+common for booleans.
 
-This is useful if you want to restrict the access to a variable. In the case of grades,
-we only want to show the grade if it is set, and we want to set the variable `_has_grade`
-when we set the grade, and clear it when we clear the grade.
+This is useful if you want to restrict the access to a variable. In the case of
+grades, we only want to show the grade if it is set, and we want to set the
+variable `has_grade_` when we set the grade, and clear it when we clear the
+grade.
 
-### About underscore in `_has_grade`
+### About underscore in `has_grade_`
 As `has_grade` is both the name of a method and an attribute, I have to rename
 one of them. If one of them is private, usually this is the one renamed.
-A leading underscore is the usual character used in these situations.
+A trailing underscore is the usual character used in these situations.
+
+### Other conventions for accessors (Extra)
+In other languages, accessors (getters and setters) are built within the
+language. Let's consider Python (although many languages like Ruby,
+Javascript/Typescript or D implement them in some way):
+
+```python
+class Example:
+    _var: int  # _ means "private" (kind of)
+
+    @property
+    def var(self):
+        return self._var
+
+    @x.setter
+    def x(self, value):
+        self._var = value
+
+# Used as:
+e = Example()
+e.var = 5
+print(e.var)  # -> 5
+```
+
+On the other hand, there are Java and Objective-C, for example, that, while
+they don't implement at the language level such constructs, they do have
+strong conventions to use them:
+
+```java
+// Java
+class Example {
+    private int var;
+    public int get_var() {
+        return this.var;
+    }
+    public void set_var(int var) {
+        this.var = var;
+    }
+
+    public static void main(String[] args) {
+        // Used as:
+        Example e = new Example();
+        e.set_var(5);
+        System.out.println(e.get_var()); // -> 5
+    }
+}
+```
+
+However, C++ has neither a built-in method like Python nor a standard convention
+like Java. In this document, I've used the Java style:
+
+```c++
+class Example {
+private:
+    int var;
+public:
+    int get_var() const;
+    void set_var(int new_x);
+}
+```
+
+But other conventions for accessors are also used:
+
+Overload style:
+```c++
+class Example {
+private:
+    int var_;
+public:
+    int var() const;
+    void var(int new_x);
+}
+```
+
+Objective-C style:
+```c++
+class Example {
+private:
+    int var_;
+public:
+    int var() const;
+    void setVar(int var);
+}
+```
+
+You may find any of them, depending on who wrote the code: the STL
+(e.g.: `std::vector`) uses mostly the overload style (with some variations, like
+references where appropiate), while the Qt library (commonly used for GUIs) uses
+Objective-C style.
+
 
 ## Static attributes
 A class can have static attributes (which are, more often than not, constants).
@@ -511,6 +607,8 @@ the bad news is that information will not be automatically transferred to your
 brain. Sorry.
 
 ---
+
+Footnotes:
 
 \* In case you haven't guessed, "as an exercice for the reader" translates to
 "I'm too tired to explain it, and most of you already have too much things to
