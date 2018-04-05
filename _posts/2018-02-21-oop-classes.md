@@ -173,7 +173,7 @@ int main() {
 
 Note the syntax for calling static methods, which is different from non-static
 ones. For fans of short and complex (pun not intended) code, here is the same
-with one line (interpretation left as an exercise for the reader\*):
+with one line (interpretation left as an exercise for the reader[^1]):
 
 ```c++
 int main() {
@@ -600,7 +600,7 @@ method.
 
 If you read all the post and reached this line, congratulations, you're
 done! Also, congratulations, because if you've understood this, you've
-understood all the theory of the first weeks of the _quatrimestre_.
+understood all the theory of the first weeks of the course.
 
 However, if you are here only because you scrolled past the article,
 the bad news is that information will not be automatically transferred to your
@@ -610,8 +610,8 @@ brain. Sorry.
 
 Footnotes:
 
-\* In case you haven't guessed, "as an exercice for the reader" translates to
-"I'm too tired to explain it, and most of you already have too much things to
-assimilate, so I won't digress further. Have fun."
+[^1]: In case you haven't guessed, "as an exercice for the reader" translates to
+    "I'm too tired to explain it, and most of you already have too much things to
+    assimilate, so I won't digress further. Have fun."
 
 [What you should have learned]: {{ site.base_url }}{% post_url 2018-02-20-what-you-should-have-learned %}
